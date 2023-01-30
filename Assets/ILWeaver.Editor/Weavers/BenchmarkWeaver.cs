@@ -31,7 +31,7 @@ namespace ILWeaver.Editor.Weavers
 			var longType = CecilUtilities.GetTypeDefinition<long>();
 			var stopwatchStartNew = CecilUtilities.GetMethodDefinition<Stopwatch>(nameof(Stopwatch.StartNew), Type.EmptyTypes);
 			var stopwatchElapsedMilliseconds = CecilUtilities.GetPropertyDefinition<Stopwatch>(nameof(Stopwatch.ElapsedMilliseconds));
-			var logMethod = CecilUtilities.GetMethodDefinition<Debug>(nameof(Debug.LogError), new[] { typeof(object) });
+			var logMethod = CecilUtilities.GetMethodDefinition<Debug>(nameof(Debug.Log), new[] { typeof(object) });
 
 			var _1 = Instruction.Create(OpCodes.Call, module.ImportReference(stopwatchStartNew));
 			var _2 = Instruction.Create(OpCodes.Callvirt, module.ImportReference(stopwatchElapsedMilliseconds.GetMethod));
@@ -54,7 +54,7 @@ namespace ILWeaver.Editor.Weavers
 			var stopwatchStartNew = CecilUtilities.GetMethodDefinition<Stopwatch>(nameof(Stopwatch.StartNew), Type.EmptyTypes);
 			var stopwatchElapsedMilliseconds = CecilUtilities.GetPropertyDefinition<Stopwatch>(nameof(Stopwatch.ElapsedMilliseconds));
 			var stringFormat = CecilUtilities.GetMethodDefinition<string>(nameof(string.Format), new[] { typeof(string), typeof(object) });
-			var logMethod = CecilUtilities.GetMethodDefinition<Debug>(nameof(Debug.LogError), new[] { typeof(object) });
+			var logMethod = CecilUtilities.GetMethodDefinition<Debug>(nameof(Debug.Log), new[] { typeof(object) });
 			var stopwatchLocalVar = new VariableDefinition(module.ImportReference(stopwatchType));
 		
 			il.Body.Variables.Add(stopwatchLocalVar);

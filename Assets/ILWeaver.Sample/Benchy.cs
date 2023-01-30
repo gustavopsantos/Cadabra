@@ -7,13 +7,8 @@ namespace ILWeaver.Sample
 {
     public class Benchy : MonoBehaviour
     {
-        private void Start()
-        {
-            Foo();
-        }
-
         [Benchmark]
-        private static void Foo()
+        private void Start()
         {
             Thread.Sleep(TimeSpan.FromMilliseconds(50));
         }
