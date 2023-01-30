@@ -1,6 +1,6 @@
 # Unity IL Weaver
 
-## Overview
+## Benchmark Sample Overview
 
 **NOTE: All methods marked with `Benchmark` will have benchmark code injected.**
 
