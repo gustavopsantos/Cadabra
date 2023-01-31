@@ -1,4 +1,9 @@
+<div align=center>   
+<img src="Graphics/cauldron.png" width="320px">
+
 # Cadabra
+### Unity CIL assembly weaving made easy
+</div>
 
 ## Benchmark Sample Overview
 
@@ -32,6 +37,5 @@ class MyClass
 > The actual injected class and method names are different
 
 ## Credits
-
-Cadabra was made possible by:
-- [com.unity.entities](https://github.com/needle-mirror/com.unity.entities)
+-  Cadabra was made possible by [com.unity.entities](https://github.com/needle-mirror/com.unity.entities)
+- Icon <a href="https://www.flaticon.com/free-icons/witch" title="cadabra icon">Cadabra icon created by Freepik - Flaticon</a>

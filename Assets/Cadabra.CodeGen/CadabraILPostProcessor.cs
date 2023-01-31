@@ -1,10 +1,8 @@
-using System.Collections.Generic;
-using System.IO;
+using Mono.Cecil;
 using System.Linq;
 using Cadabra.CodeGen.Emitters;
-using Cadabra.CodeGen.UnityTechnologies;
-using Mono.Cecil;
-using Mono.Cecil.Cil;
+using Cadabra.CodeGen.Extensions;
+using System.Collections.Generic;
 using Unity.CompilationPipeline.Common.Diagnostics;
 using Unity.CompilationPipeline.Common.ILPostProcessing;
 
@@ -19,13 +17,13 @@ namespace Cadabra.CodeGen
 
         public override bool WillProcess(ICompiledAssembly compiledAssembly)
         {
-            return true; 
+            return true;
         }
 
         public override ILPostProcessResult Process(ICompiledAssembly compiledAssembly)
         {
             var diagnostics = new List<DiagnosticMessage>();
-            var assemblyDefinition = LoadAssemblyDefinition(compiledAssembly);
+            var assemblyDefinition = compiledAssembly.Read();
 
             foreach (var module in assemblyDefinition.Modules)
             {
@@ -33,9 +31,9 @@ namespace Cadabra.CodeGen
             }
 
             RemoveSelfReferenceIfNeeded(assemblyDefinition);
-            BakeAssemblyDefinition(assemblyDefinition, out var pe, out var pdb);
+            assemblyDefinition.Write(out var pe, out var pdb);
 
-            return new ILPostProcessResult(new InMemoryAssembly(pe.ToArray(), pdb.ToArray()), diagnostics);
+            return new ILPostProcessResult(new InMemoryAssembly(pe, pdb), diagnostics);
         }
 
         private static void RemoveSelfReferenceIfNeeded(AssemblyDefinition assemblyDefinition)
@@ -48,48 +46,6 @@ namespace Cadabra.CodeGen
             {
                 assemblyDefinition.MainModule.AssemblyReferences.RemoveAt(selfReferenceIndex);
             }
-        }
-
-        private static AssemblyDefinition LoadAssemblyDefinition(ICompiledAssembly compiledAssembly)
-        {
-            var resolver = new PostProcessorAssemblyResolver(compiledAssembly);
-            var readerParameters = new ReaderParameters
-            {
-                SymbolStream = new MemoryStream(compiledAssembly.InMemoryAssembly.PdbData.ToArray()),
-                SymbolReaderProvider = new PortablePdbReaderProvider(),
-                AssemblyResolver = resolver,
-                ReflectionImporterProvider = new PostProcessorReflectionImporterProvider(),
-                ReadingMode = ReadingMode.Immediate
-            };
-
-            var peStream = new MemoryStream(compiledAssembly.InMemoryAssembly.PeData.ToArray());
-            var assemblyDefinition = AssemblyDefinition.ReadAssembly(peStream, readerParameters);
-
-            //apparently, it will happen that when we ask to resolve a type that lives inside Unity.Entities, and we
-            //are also postprocessing Unity.Entities, type resolving will fail, because we do not actually try to resolve
-            //inside the assembly we are processing. Let's make sure we do that, so that we can use postprocessor features inside
-            //unity.entities itself as well.
-            resolver.AddAssemblyDefinitionBeingOperatedOn(assemblyDefinition);
-
-            return assemblyDefinition;
-        }
-
-        private static void BakeAssemblyDefinition(AssemblyDefinition asmDef, out byte[] pe, out byte[] pdb)
-        {
-            using var peStream = new MemoryStream();
-            using var pdbStream = new MemoryStream();
-
-            var writerParameters = new WriterParameters
-            {
-                SymbolWriterProvider = new PortablePdbWriterProvider(),
-                SymbolStream = pdbStream,
-                WriteSymbols = true,
-            };
-
-            asmDef.Write(peStream, writerParameters);
-
-            pe = peStream.ToArray();
-            pdb = pdbStream.ToArray();
         }
     }
 }
