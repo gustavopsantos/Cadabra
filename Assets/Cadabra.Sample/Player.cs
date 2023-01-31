@@ -6,7 +6,7 @@ namespace Cadabra.Sample
 {
     public class Player : MonoBehaviour
     {
-        [Benchmark] 
+        [Benchmark]
         private void Start()
         {
             Thread.Sleep(TimeSpan.FromMilliseconds(120));

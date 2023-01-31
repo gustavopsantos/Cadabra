@@ -31,7 +31,15 @@ namespace Cadabra.CodeGen
             {
                 BenchmarkILEmitter.Weave(module);
             }
-            
+
+            RemoveSelfReferenceIfNeeded(assemblyDefinition);
+            BakeAssemblyDefinition(assemblyDefinition, out var pe, out var pdb);
+
+            return new ILPostProcessResult(new InMemoryAssembly(pe.ToArray(), pdb.ToArray()), diagnostics);
+        }
+
+        private static void RemoveSelfReferenceIfNeeded(AssemblyDefinition assemblyDefinition)
+        {
             var (selfReference, selfReferenceIndex) = assemblyDefinition.MainModule.AssemblyReferences
                 .Select((x, i) => (x, i))
                 .FirstOrDefault(e => e.x.Name == assemblyDefinition.Name.Name);
@@ -40,19 +48,6 @@ namespace Cadabra.CodeGen
             {
                 assemblyDefinition.MainModule.AssemblyReferences.RemoveAt(selfReferenceIndex);
             }
-
-            var pe = new MemoryStream();
-            var pdb = new MemoryStream();
-            var writerParameters = new WriterParameters
-            {
-                SymbolWriterProvider = new PortablePdbWriterProvider(),
-                SymbolStream = pdb,
-                WriteSymbols = true
-            };
-
-            assemblyDefinition.Write(pe, writerParameters);
-
-            return new ILPostProcessResult(new InMemoryAssembly(pe.ToArray(), pdb.ToArray()), diagnostics);
         }
 
         private static AssemblyDefinition LoadAssemblyDefinition(ICompiledAssembly compiledAssembly)
@@ -77,6 +72,24 @@ namespace Cadabra.CodeGen
             resolver.AddAssemblyDefinitionBeingOperatedOn(assemblyDefinition);
 
             return assemblyDefinition;
+        }
+
+        private static void BakeAssemblyDefinition(AssemblyDefinition asmDef, out byte[] pe, out byte[] pdb)
+        {
+            using var peStream = new MemoryStream();
+            using var pdbStream = new MemoryStream();
+
+            var writerParameters = new WriterParameters
+            {
+                SymbolWriterProvider = new PortablePdbWriterProvider(),
+                SymbolStream = pdbStream,
+                WriteSymbols = true,
+            };
+
+            asmDef.Write(peStream, writerParameters);
+
+            pe = peStream.ToArray();
+            pdb = pdbStream.ToArray();
         }
     }
 }
