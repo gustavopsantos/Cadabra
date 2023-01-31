@@ -1,8 +1,4 @@
-# Unity IL Weaver
-
-## Important
-After initializing unity for the first time, the weaver will be compiled at the same time as all other code.
-So after having the first compilation, make any change to any code inside ILWeaver.Sample to force it to be recompiled, and from now on, weaved after each compilation.
+# Cadabra
 
 ## Benchmark Sample Overview
 
