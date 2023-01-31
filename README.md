@@ -6,20 +6,32 @@
 
 Before code:
 ```csharp
-[Benchmark]
-private static void Foo()
+class MyClass
 {
-    Thread.Sleep(TimeSpan.FromMilliseconds(50));
+    [Benchmark]
+    void MyMethod()
+    {
+        Thread.Sleep(TimeSpan.FromMilliseconds(120));
+    }
 }
 ```
 
 What gets compiled:
-```csharp	[Benchmark]
-private static void Foo()
+```csharp	
+class MyClass
 {
-    Stopwatch stopwatch = Stopwatch.StartNew();
-    Thread.Sleep(TimeSpan.FromMilliseconds(50.0));
-    Debug.Log($"Benchy::Foo took {stopwatch.ElapsedMilliseconds}ms.");
+    [Benchmark]
+    void MyMethod()
+    {
+        Stopwatch stopwatch = Stopwatch.StartNew();
+        Thread.Sleep(TimeSpan.FromMilliseconds(120));
+        Debug.Log($"MyClass::MyMethod took {stopwatch.ElapsedMilliseconds}ms.");
+    }
 }
 ```
 > The actual injected class and method names are different
+
+## Credits
+
+Cadabra was made possible by:
+- [com.unity.entities](https://github.com/needle-mirror/com.unity.entities)
