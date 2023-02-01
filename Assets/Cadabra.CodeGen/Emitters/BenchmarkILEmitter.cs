@@ -11,10 +11,12 @@ namespace Cadabra.CodeGen.Emitters
 	{
 		public static void Weave(ModuleDefinition module)
 		{
-			var methods = module.GetTypes().SelectMany(type => type.Methods);
-			var benchmarkMethods = methods.Where(method => method.DefinesAttribute<BenchmarkAttribute>());
+			var markedMethods = module
+				.GetTypes()
+				.SelectMany(type => type.Methods)
+				.Where(method => method.DefinesAttribute<BenchmarkAttribute>());
 			
-			foreach (var method in benchmarkMethods)
+			foreach (var method in markedMethods)
 			{
 				Emit(module, method);
 			}
@@ -27,7 +29,7 @@ namespace Cadabra.CodeGen.Emitters
 			var longTypeRef = module.ImportReference(typeof(long));
 			var stopwatchTypeRef = module.ImportReference(typeof(Stopwatch));
 			var stopwatchStartNew = module.ImportReference(typeof(Stopwatch).GetMethod(nameof(Stopwatch.StartNew)));
-			var stopwatchElapsedMillisecondsGetter = module.ImportReference(typeof(Stopwatch).GetProperty(nameof(Stopwatch.ElapsedMilliseconds)).GetMethod);
+			var stopwatchElapsedMillisecondsGetter = module.ImportReference(typeof(Stopwatch).GetProperty(nameof(Stopwatch.ElapsedMilliseconds))!.GetMethod);
 			var stringFormat = module.ImportReference(typeof(string).FindMethod("Format", typeof(string), typeof(object)));
 			var logMethod = module.ImportReference(typeof(Debug).GetMethods().Single(m => m.Name == "Log" && m.GetParameters().Length == 1));
 			var stopwatchLocalVar = new VariableDefinition(module.ImportReference(stopwatchTypeRef));
